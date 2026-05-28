@@ -13,5 +13,17 @@ export default defineConfig({
     search: {
       provider: 'local',
     },
+
+    // 默认页面底部展示
+    footer: {
+      message: '作者：XXX | 联系：admin@example.com',
+      copyright: 'Copyright © 2026',
+    },
+
+    // 作者信息，供全局使用
+    author: {
+      name: 'XXX',
+      contact: 'admin@example.com',
+    },
   },
 })

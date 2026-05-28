@@ -11,6 +11,11 @@
     <main class="mindmap-main">
       <MindMap :content="content" />
     </main>
+    <footer class="mindmap-footer">
+      <span>作者：{{ author.name }}</span>
+      <span class="mindmap-footer-sep">|</span>
+      <span>联系：{{ author.contact }}</span>
+    </footer>
   </div>
 </template>
 
@@ -19,11 +24,12 @@ import { computed } from 'vue'
 import { useData } from 'vitepress'
 import MindMap from '../components/MindMap.vue'
 
-const { site, frontmatter } = useData()
+const { site, frontmatter, theme } = useData()
 
 const siteTitle = computed(() => site.value.title)
 const content = computed(() => frontmatter.value.mindmap || '')
 const breadcrumbs = computed(() => frontmatter.value.breadcrumbs || [])
+const author = computed(() => theme.value.author || { name: '', contact: '' })
 </script>
 
 <style>
@@ -75,5 +81,22 @@ const breadcrumbs = computed(() => frontmatter.value.breadcrumbs || [])
 .mindmap-main {
   flex: 1;
   min-height: 0;
+}
+
+.mindmap-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 24px;
+  border-top: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+  font-size: 12px;
+  color: var(--vp-c-text-3);
+  flex-shrink: 0;
+}
+
+.mindmap-footer-sep {
+  color: var(--vp-c-divider);
 }
 </style>
