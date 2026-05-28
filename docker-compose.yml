@@ -1,0 +1,9 @@
+services:
+  workflowshow:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      # 挂载内容目录 — 修改服务器上的 md 文件后，重启容器即可更新
+      - ./docs/mindmaps:/app/docs/mindmaps
+      - ./docs/public:/app/docs/public
