@@ -4,6 +4,17 @@ export default defineConfig({
   title: 'Workflow Show',
   description: '岗位工作内容、流程与文件展示',
 
+  // 最大浏览器兼容性
+  vite: {
+    build: {
+      target: 'es2015',
+      cssTarget: 'chrome61',
+    },
+    esbuild: {
+      target: 'es2015',
+    },
+  },
+
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
