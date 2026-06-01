@@ -54,7 +54,7 @@ function render() {
 
   mm = Markmap.create(svg, {
     autoFit: true,
-    duration: 300,
+    duration: 0,
     maxWidth: 320,
     paddingX: 24,
   }, root)
