@@ -127,3 +127,18 @@ themeConfig: {
 - `?.` 可选链 / 箭头函数已降级为 ES5 语法
 - `.browserslistrc` 配置覆盖市场份额 0.2% 以上的所有浏览器
 - 不支持 IE11（Vue 3 需要 `Proxy`）
+
+### 旧浏览器 Polyfills（`polyfills.js`）
+
+| API | 缺失版本 | 说明 |
+|-----|---------|------|
+| `globalThis` | Chrome < 71 | Vue/VitePress 运行时依赖 |
+| `Promise.allSettled` | Chrome < 76 | Vue 异步组件 hydration |
+| `Array.flatMap` | Chrome < 69 | VitePress 内部视图路由 |
+| `String.trimEnd` | Chrome < 66 | markmap-lib 解析器 |
+| `String.trimStart` | Chrome < 66 | markmap-lib 解析器 |
+| `ResizeObserver` | Chrome < 64 | markmap-view 内部使用 |
+| `:where()` CSS | Chrome < 88 | patch querySelector，自动剥离 |
+| RegExp named groups | Chrome < 64 | 排除 markmap katex 插件 |
+| Unicode prop escapes | Chrome < 64 | 排除 markmap hljs 插件 |
+| SVG foreignObject 事件穿透 | Chrome 63 | 使用 `elementsFromPoint` 替代 `closest`，`href` 转 `data-href` 防双重历史记录 |
