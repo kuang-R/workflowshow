@@ -25,9 +25,12 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, defineAsyncComponent } from 'vue'
 import { useData } from 'vitepress'
-import MindMap from '../components/MindMap.vue'
+
+const MindMap = defineAsyncComponent(function () {
+  return import('../components/MindMap.vue')
+})
 
 const { site, frontmatter, theme } = useData()
 
