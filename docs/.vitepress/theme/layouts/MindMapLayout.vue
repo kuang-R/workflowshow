@@ -7,6 +7,11 @@
           {{ crumb.text }}
         </a>
       </div>
+      <nav class="mindmap-nav">
+        <a v-for="item in navItems" :key="item.link" :href="item.link">
+          {{ item.text }}
+        </a>
+      </nav>
     </header>
     <main class="mindmap-main">
       <MindMap :content="content" />
@@ -30,6 +35,7 @@ const siteTitle = computed(() => site.value.title)
 const content = computed(() => frontmatter.value.mindmap || '')
 const breadcrumbs = computed(() => frontmatter.value.breadcrumbs || [])
 const author = computed(() => theme.value.author || { name: '', contact: '' })
+const navItems = computed(() => theme.value.nav || [])
 </script>
 
 <style>
@@ -76,6 +82,23 @@ const author = computed(() => theme.value.author || { name: '', contact: '' })
 .mindmap-breadcrumb a + a::before {
   content: ' / ';
   color: var(--vp-c-divider);
+}
+
+.mindmap-nav {
+  display: flex;
+  gap: 16px;
+  margin-left: auto;
+}
+
+.mindmap-nav a {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--vp-c-text-1);
+  text-decoration: none;
+}
+
+.mindmap-nav a:hover {
+  color: var(--vp-c-brand);
 }
 
 .mindmap-main {
