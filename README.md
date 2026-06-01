@@ -48,7 +48,7 @@ docs/
 │       ├── index.js                   # 主题入口
 │       ├── Layout.vue                 # 布局分发（mindmap / 默认）
 │       ├── layouts/
-│       │   └── MindMapLayout.vue      # 思维导图全屏布局
+│       │   └── MindMapLayout.vue      # 思维导图全屏布局（含导航 + 面包屑）
 │       └── components/
 │           └── MindMap.vue            # markmap 渲染组件
 ├── index.md                           # 首页 — 工作总览思维导图
@@ -58,7 +58,8 @@ docs/
 │   ├── review.md
 │   └── deploy.md
 ├── public/files/                      # 可下载文件
-└── downloads.md                       # 文件下载页（普通页面）
+├── downloads.md                       # 文件下载页
+└── about.md                           # 关于页面
 ```
 
 ## 思维导图编写
@@ -86,6 +87,16 @@ mindmap: |
 - `#` / `##` 定义层级标题
 - `[文本](链接)` 生成可点击跳转的节点
 - `breadcrumbs` 控制顶部面包屑导航
+- 思维导图页面顶部同时展示 `themeConfig.nav` 配置的导航链接
+
+## 页面类型
+
+| 页面 | 布局 | 说明 |
+|------|------|------|
+| `index.md` | mindmap | 首页，工作总览思维导图 |
+| `mindmaps/*.md` | mindmap | 各岗位/流程思维导图，支持交叉跳转 |
+| `downloads.md` | 默认 | 文件下载页，展示下载表格 |
+| `about.md` | 默认 | 关于页面，介绍项目与技术栈 |
 
 ## 配置
 
