@@ -4,11 +4,15 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { useRouter } from 'vitepress'
 import { Transformer } from 'markmap-lib'
+import {
+  pluginFrontmatter,
+  pluginNpmUrl,
+  pluginCheckbox,
+  pluginSourceLines,
+} from 'markmap-lib/plugins'
 import { Markmap } from 'markmap-view'
 
-const router = useRouter()
 const props = defineProps({
   content: { type: String, required: true },
 })
@@ -45,7 +49,13 @@ function render() {
   if (!container.value) return
   container.value.innerHTML = ''
 
-  var transformer = new Transformer()
+  // Exclude katex (named capture groups) and hljs (unicode property escapes)
+  var transformer = new Transformer([
+    pluginFrontmatter,
+    pluginNpmUrl,
+    pluginCheckbox,
+    pluginSourceLines,
+  ])
   var root = transformer.transform(props.content).root
 
   var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
@@ -59,16 +69,50 @@ function render() {
     paddingX: 24,
   }, root)
 
-  svg.addEventListener('click', function (e) {
-    var anchor = e.target.closest('a')
+  // Chrome 63: prevent double history by removing native href from <a> tags
+  // inside foreignObject, since preventDefault() may not work across namespaces.
+  var allLinks = svg.querySelectorAll('a')
+  for (var k = 0; k < allLinks.length; k++) {
+    var lk = allLinks[k]
+    var lkHref = lk.getAttribute('href') || lk.getAttributeNS('http://www.w3.org/1999/xlink', 'href')
+    if (lkHref) {
+      lk.setAttribute('data-href', lkHref)
+      lk.removeAttribute('href')
+      lk.removeAttributeNS('http://www.w3.org/1999/xlink', 'href')
+    }
+  }
+
+  // Use mousemove for cursor (CSS may not apply in foreignObject)
+  container.value.addEventListener('mousemove', function (e) {
+    var els = document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : []
+    var found = false
+    for (var i = 0; i < els.length; i++) {
+      if ((els[i].nodeName || '').toLowerCase() === 'a') { found = true; break }
+    }
+    container.value.style.cursor = found ? 'pointer' : ''
+  })
+
+  // Navigate on click
+  container.value.addEventListener('click', function (e) {
+    var els = document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : []
+    var anchor = null
+    for (var i = 0; i < els.length; i++) {
+      if ((els[i].nodeName || '').toLowerCase() === 'a') { anchor = els[i]; break }
+    }
     if (!anchor) return
-    var href = anchor.getAttribute('href')
+    var href = anchor.getAttribute('data-href')
     if (!href) return
-    e.preventDefault()
+    e.stopPropagation()
     if (href.startsWith('/') || href.startsWith(location.origin)) {
-      router.go(href)
+      location.href = href
     } else {
-      window.open(href, '_blank')
+      var tmp = document.createElement('a')
+      tmp.href = href
+      tmp.target = '_blank'
+      tmp.rel = 'noopener'
+      document.body.appendChild(tmp)
+      tmp.click()
+      document.body.removeChild(tmp)
     }
   })
 }
