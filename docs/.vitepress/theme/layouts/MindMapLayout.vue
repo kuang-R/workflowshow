@@ -49,7 +49,6 @@ const navItems = computed(() => theme.value.nav || [])
 .mindmap-header {
   display: flex;
   align-items: center;
-  gap: 24px;
   padding: 12px 24px;
   border-bottom: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg);
@@ -61,13 +60,18 @@ const navItems = computed(() => theme.value.nav || [])
   font-size: 16px;
   color: var(--vp-c-brand);
   text-decoration: none;
+  margin-right: 24px;
 }
 
 .mindmap-breadcrumb {
   display: flex;
-  gap: 8px;
   font-size: 13px;
   color: var(--vp-c-text-2);
+  margin-right: 24px;
+}
+
+.mindmap-breadcrumb a + a {
+  margin-left: 8px;
 }
 
 .mindmap-breadcrumb a {
@@ -86,8 +90,11 @@ const navItems = computed(() => theme.value.nav || [])
 
 .mindmap-nav {
   display: flex;
-  gap: 16px;
   margin-left: auto;
+}
+
+.mindmap-nav a + a {
+  margin-left: 16px;
 }
 
 .mindmap-nav a {
@@ -110,13 +117,17 @@ const navItems = computed(() => theme.value.nav || [])
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 8px;
   padding: 8px 24px;
   border-top: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg);
   font-size: 12px;
+  line-height: 1;
   color: var(--vp-c-text-3);
   flex-shrink: 0;
+}
+
+.mindmap-footer > * + * {
+  margin-left: 8px;
 }
 
 .mindmap-footer-sep {

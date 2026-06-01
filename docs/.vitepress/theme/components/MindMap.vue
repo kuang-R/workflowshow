@@ -17,14 +17,38 @@ const container = ref(null)
 let mm = null
 let resizeObserver = null
 
+function observeResize() {
+  if (typeof ResizeObserver !== 'undefined') {
+    resizeObserver = new ResizeObserver(function () {
+      if (mm) mm.fit()
+    })
+    resizeObserver.observe(container.value)
+  } else {
+    window.addEventListener('resize', onWindowResize)
+  }
+}
+
+function onWindowResize() {
+  if (mm) mm.fit()
+}
+
+function unobserveResize() {
+  if (resizeObserver) {
+    resizeObserver.disconnect()
+    resizeObserver = null
+  } else {
+    window.removeEventListener('resize', onWindowResize)
+  }
+}
+
 function render() {
   if (!container.value) return
   container.value.innerHTML = ''
 
-  const transformer = new Transformer()
-  const { root } = transformer.transform(props.content)
+  var transformer = new Transformer()
+  var root = transformer.transform(props.content).root
 
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   svg.setAttribute('style', 'width: 100%; height: 100%; display: block;')
   container.value.appendChild(svg)
 
@@ -35,10 +59,10 @@ function render() {
     paddingX: 24,
   }, root)
 
-  svg.addEventListener('click', (e) => {
-    const anchor = e.target.closest('a')
+  svg.addEventListener('click', function (e) {
+    var anchor = e.target.closest('a')
     if (!anchor) return
-    const href = anchor.getAttribute('href')
+    var href = anchor.getAttribute('href')
     if (!href) return
     e.preventDefault()
     if (href.startsWith('/') || href.startsWith(location.origin)) {
@@ -49,19 +73,16 @@ function render() {
   })
 }
 
-onMounted(() => {
+onMounted(function () {
   render()
   if (container.value) {
-    resizeObserver = new ResizeObserver(() => {
-      mm?.fit()
-    })
-    resizeObserver.observe(container.value)
+    observeResize()
   }
 })
 
-onBeforeUnmount(() => {
-  resizeObserver?.disconnect()
-  mm?.destroy()
+onBeforeUnmount(function () {
+  unobserveResize()
+  if (mm) mm.destroy()
 })
 
 watch(() => props.content, () => {
