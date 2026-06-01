@@ -116,4 +116,14 @@ themeConfig: {
 
 ## 兼容性
 
-支持 2020 年后发布的主流浏览器（Chrome 87+、Firefox 78+、Safari 14+、Edge 88+）。不支持 IE11。
+构建目标 `es2015`，最低支持：
+
+| Chrome | Firefox | Safari | Edge | iOS Safari | Android WebView |
+|--------|---------|--------|------|------------|-----------------|
+| ≥ 61 | ≥ 54 | ≥ 10 | ≥ 15 | ≥ 9 | ≥ 4.4 |
+
+- CSS `gap` 降级为 `margin` 间距方案，兼容旧 Chromium（搜狗浏览器等）
+- `ResizeObserver` 降级为 `window.resize` 事件
+- `?.` 可选链 / 箭头函数已降级为 ES5 语法
+- `.browserslistrc` 配置覆盖市场份额 0.2% 以上的所有浏览器
+- 不支持 IE11（Vue 3 需要 `Proxy`）
