@@ -4,8 +4,11 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { useRouter } from 'vitepress'
 import { Transformer } from 'markmap-lib'
 import { Markmap } from 'markmap-view'
+
+const router = useRouter()
 const props = defineProps({
   content: { type: String, required: true },
 })
@@ -31,6 +34,19 @@ function render() {
     maxWidth: 320,
     paddingX: 24,
   }, root)
+
+  svg.addEventListener('click', (e) => {
+    const anchor = e.target.closest('a')
+    if (!anchor) return
+    const href = anchor.getAttribute('href')
+    if (!href) return
+    e.preventDefault()
+    if (href.startsWith('/') || href.startsWith(location.origin)) {
+      router.go(href)
+    } else {
+      window.open(href, '_blank')
+    }
+  })
 }
 
 onMounted(() => {
