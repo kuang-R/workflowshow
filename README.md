@@ -32,7 +32,7 @@ npm run docs:preview
 # 构建并启动
 docker compose up -d --build
 
-# 修改 docs/mindmaps/ 下的文件后，重启即可生效
+# 修改 content/ 下的文件后，重启即可生效
 docker compose restart
 ```
 
@@ -41,25 +41,33 @@ docker compose restart
 ## 目录结构
 
 ```
-docs/
+docs/                                   # 应用代码（镜像内）
 ├── .vitepress/
-│   ├── config.js                      # 站点配置、导航、作者信息
-│   └── theme/
-│       ├── index.js                   # 主题入口
-│       ├── Layout.vue                 # 布局分发（mindmap / 默认）
+│   ├── config.js
+│   └── theme/                          # 自定义主题
+│       ├── index.js
+│       ├── polyfills.js                # 浏览器兼容 polyfills
+│       ├── Layout.vue
 │       ├── layouts/
-│       │   └── MindMapLayout.vue      # 思维导图全屏布局（含导航 + 面包屑）
+│       │   └── MindMapLayout.vue
 │       └── components/
-│           └── MindMap.vue            # markmap 渲染组件
-├── index.md                           # 首页 — 工作总览思维导图
-├── mindmaps/                          # 思维导图内容（Docker 挂载点）
+│           └── MindMap.vue             # markmap 渲染组件
+├── index.md            → ../content/index.md      (symlink)
+├── downloads.md        → ../content/downloads.md  (symlink)
+├── about.md            → ../content/about.md      (symlink)
+├── mindmaps/           → ../content/mindmaps/     (symlink)
+└── public/             → ../content/files/        (symlink)
+
+content/                                # 用户内容（Docker 挂载点）
+├── index.md                            # 首页思维导图
+├── downloads.md                        # 文件下载页
+├── about.md                            # 关于页面
+├── mindmaps/                           # 思维导图内容
 │   ├── frontend.md
 │   ├── backend.md
 │   ├── review.md
 │   └── deploy.md
-├── public/files/                      # 可下载文件
-├── downloads.md                       # 文件下载页
-└── about.md                           # 关于页面
+└── files/                              # 可下载文件
 ```
 
 ## 思维导图编写
