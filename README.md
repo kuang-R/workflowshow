@@ -14,9 +14,6 @@
 ```bash
 npm install
 
-# 本地开发（热更新）
-npm run docs:dev
-
 # 构建生产版本
 npm run docs:build
 
@@ -24,19 +21,22 @@ npm run docs:build
 npm run docs:preview
 ```
 
+> 因兼容性处理需要构建阶段介入，不支持 `docs:dev` 热更新开发模式。
+
 ## Docker 部署
 
-容器启动时从挂载的内容文件重新构建站点，更新内容只需重启容器，无需重新构建镜像。
-
 ```bash
-# 构建并启动
+# 首次部署 — 构建镜像并启动
 docker compose up -d --build
 
-# 修改 content/ 下的文件后，重启即可生效
+# 只改了内容（content/*.md）— 重启容器，自动重新构建站点
 docker compose restart
+
+# 改了代码（docs/.vitepress/ 等）— 需要重新构建镜像
+docker compose up -d --build
 ```
 
-镜像内包含 Node.js + Nginx，启动流程：`entrypoint.sh` → `npm run docs:build` → `cp dist → nginx html` → 启动 Nginx。
+镜像内包含 Node.js + Nginx，启动流程：`entrypoint.sh` → `npm run docs:build` → `cp dist → nginx html` → 启动 Nginx。内容通过卷挂载进入容器，启动时实时构建。
 
 ## 目录结构
 
@@ -124,29 +124,4 @@ themeConfig: {
 
 ## 兼容性
 
-构建目标 `es2015`，最低支持：
-
-| Chrome | Firefox | Safari | Edge | iOS Safari | Android WebView |
-|--------|---------|--------|------|------------|-----------------|
-| ≥ 61 | ≥ 54 | ≥ 10 | ≥ 15 | ≥ 9 | ≥ 4.4 |
-
-- CSS `gap` 降级为 `margin` 间距方案，兼容旧 Chromium（搜狗浏览器等）
-- `ResizeObserver` 降级为 `window.resize` 事件
-- `?.` 可选链 / 箭头函数已降级为 ES5 语法
-- `.browserslistrc` 配置覆盖市场份额 0.2% 以上的所有浏览器
-- 不支持 IE11（Vue 3 需要 `Proxy`）
-
-### 旧浏览器 Polyfills（`polyfills.js`）
-
-| API | 缺失版本 | 说明 |
-|-----|---------|------|
-| `globalThis` | Chrome < 71 | Vue/VitePress 运行时依赖 |
-| `Promise.allSettled` | Chrome < 76 | Vue 异步组件 hydration |
-| `Array.flatMap` | Chrome < 69 | VitePress 内部视图路由 |
-| `String.trimEnd` | Chrome < 66 | markmap-lib 解析器 |
-| `String.trimStart` | Chrome < 66 | markmap-lib 解析器 |
-| `ResizeObserver` | Chrome < 64 | markmap-view 内部使用 |
-| `:where()` CSS | Chrome < 88 | patch querySelector，自动剥离 |
-| RegExp named groups | Chrome < 64 | 排除 markmap katex 插件 |
-| Unicode prop escapes | Chrome < 64 | 排除 markmap hljs 插件 |
-| SVG foreignObject 事件穿透 | Chrome 63 | 使用 `elementsFromPoint` 替代 `closest`，`href` 转 `data-href` 防双重历史记录 |
+构建目标 `es2015`，仅在 Chrome 63 中通过测试。不支持 IE11。
