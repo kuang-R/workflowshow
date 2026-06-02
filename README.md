@@ -2,6 +2,8 @@
 
 基于 VitePress + markmap 的岗位工作展示平台，以可交互思维导图形式展示工作组成与流程，支持 Docker 容器化部署。
 
+**演示站点：** [kuang-R.github.io/workflowshow](https://kuang-R.github.io/workflowshow/)
+
 ## 技术栈
 
 - **VitePress** — 静态站点生成

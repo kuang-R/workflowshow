@@ -3,6 +3,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Workflow Show',
   description: '岗位工作内容、流程与文件展示',
+  base: '/workflowshow/',
 
   // 最大浏览器兼容性
   vite: {
