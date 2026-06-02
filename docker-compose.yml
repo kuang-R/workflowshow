@@ -4,5 +4,5 @@ services:
     ports:
       - "80:80"
     volumes:
-      # 挂载内容目录 — 修改 md 文件后重启容器即可更新
+      # 单目录挂载 — 修改 content/ 下的文件后重启即可更新
       - ./content:/app/content

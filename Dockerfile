@@ -8,9 +8,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# 复制应用代码（主题、配置）
+# 复制应用代码和默认内容
 COPY docs/ ./docs/
-# 复制内容文件
 COPY content/ ./content/
 
 COPY entrypoint.sh /

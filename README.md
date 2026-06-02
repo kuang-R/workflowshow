@@ -38,38 +38,31 @@ docker compose restart
 docker compose up -d --build
 ```
 
-镜像内包含 Node.js + Nginx，启动流程：`entrypoint.sh` → `npm run docs:build` → `cp dist → nginx html` → 启动 Nginx。内容通过卷挂载进入容器，启动时实时构建。
+镜像内包含 Node.js + Nginx，启动流程：`entrypoint.sh` 将 `content/` 拷贝到 `docs/` → `npm run docs:build` → `cp dist → nginx html` → 启动 Nginx。
 
 ## 目录结构
 
 ```
-docs/                                   # 应用代码（镜像内）
+docs/                                   # 应用代码 + 默认内容
 ├── .vitepress/
 │   ├── config.js
-│   └── theme/                          # 自定义主题
+│   └── theme/
 │       ├── index.js
-│       ├── polyfills.js                # 浏览器兼容 polyfills
+│       ├── polyfills.js
 │       ├── Layout.vue
 │       ├── layouts/
 │       │   └── MindMapLayout.vue
 │       └── components/
-│           └── MindMap.vue             # markmap 渲染组件
-├── index.md            → ../content/index.md      (symlink)
-├── downloads.md        → ../content/downloads.md  (symlink)
-├── about.md            → ../content/about.md      (symlink)
-├── mindmaps/           → ../content/mindmaps/     (symlink)
-└── public/             → ../content/files/        (symlink)
-
-content/                                # 用户内容（Docker 挂载点）
-├── index.md                            # 首页思维导图
-├── downloads.md                        # 文件下载页
+│           └── MindMap.vue
+├── index.md                            # 首页
+├── downloads.md                        # 文件下载
 ├── about.md                            # 关于页面
 ├── mindmaps/                           # 思维导图内容
-│   ├── frontend.md
-│   ├── backend.md
-│   ├── review.md
-│   └── deploy.md
-└── files/                              # 可下载文件
+└── public/files/                       # 可下载文件
+
+content/                                # 服务器内容（Docker 挂载点）
+├── mindmaps/                           # → 启动时覆盖 docs/mindmaps
+└── files/                              # → 启动时覆盖 docs/public
 ```
 
 ## 思维导图编写
