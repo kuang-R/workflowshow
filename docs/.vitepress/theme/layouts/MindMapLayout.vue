@@ -41,7 +41,7 @@ const author = computed(() => theme.value.author || { name: '', contact: '' })
 const navItems = computed(() => theme.value.nav || [])
 </script>
 
-<style>
+<style scoped>
 .mindmap-layout {
   display: flex;
   flex-direction: column;
