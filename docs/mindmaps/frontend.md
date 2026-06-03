@@ -42,10 +42,10 @@ mindmap: |
   ## 协作方
   - 产品经理
   - UI/UX 设计师
-  - [后端工程师](/mindmaps/backend)
+  - [后端工程师](./backend)
   - 测试工程师
 
   ## 关联流程
-  - [需求评审](/mindmaps/review)
-  - [发布上线](/mindmaps/deploy)
+  - [需求评审](./review)
+  - [发布上线](./deploy)
 ---

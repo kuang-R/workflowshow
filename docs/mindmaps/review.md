@@ -24,8 +24,8 @@ mindmap: |
     - 参会人
       - 产品经理
       - 技术负责人
-      - [前端](/mindmaps/frontend)
-      - [后端](/mindmaps/backend)
+      - [前端](./frontend)
+      - [后端](./backend)
       - 测试
     - 评审要点
       - 需求是否清晰

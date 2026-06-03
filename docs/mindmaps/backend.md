@@ -44,11 +44,11 @@ mindmap: |
 
   ## 协作方
   - 产品经理
-  - [前端工程师](/mindmaps/frontend)
+  - [前端工程师](./frontend)
   - 测试工程师
   - SRE
 
   ## 关联流程
-  - [需求评审](/mindmaps/review)
-  - [发布上线](/mindmaps/deploy)
+  - [需求评审](./review)
+  - [发布上线](./deploy)
 ---

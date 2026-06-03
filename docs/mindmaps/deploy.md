@@ -30,8 +30,8 @@ mindmap: |
     - 回滚预案
 
   ## 涉及角色
-  - [前端](/mindmaps/frontend)
-  - [后端](/mindmaps/backend)
+  - [前端](./frontend)
+  - [后端](./backend)
   - 测试工程师
   - SRE / DevOps
   - 产品经理
