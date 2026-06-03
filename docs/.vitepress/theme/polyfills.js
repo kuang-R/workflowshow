@@ -78,7 +78,7 @@ if (typeof window !== 'undefined') {
   }
 
   // Constructable CSSStyleSheet (Chrome 73+) — Mermaid uses it for themes
-  try { new window.CSSStyleSheet() } catch (e) {
+  if (typeof CSSStyleSheet === 'undefined' || !CSSStyleSheet.prototype.insertRule) {
     window.CSSStyleSheet = function () {
       var el = document.createElement('style')
       document.head.appendChild(el)
@@ -95,16 +95,20 @@ if (typeof window !== 'undefined') {
   }
 
   // Patch querySelector/querySelectorAll to strip :where() (Chrome 88+)
+  // Only wrap if :where() is unsupported — test via try/catch
   ;(function () {
-    function fix(s) { return s.replace(/:where\(([^)]+)\)/g, '$1') }
-    var _qsa = Document.prototype.querySelectorAll
-    Document.prototype.querySelectorAll = function (s) { return _qsa.call(this, fix(s)) }
-    var _qs = Document.prototype.querySelector
-    Document.prototype.querySelector = function (s) { return _qs.call(this, fix(s)) }
-    var _eqsa = Element.prototype.querySelectorAll
-    Element.prototype.querySelectorAll = function (s) { return _eqsa.call(this, fix(s)) }
-    var _eqs = Element.prototype.querySelector
-    Element.prototype.querySelector = function (s) { return _eqs.call(this, fix(s)) }
+    try { document.querySelector(':where(*)') } catch (e) {
+      var WHERE_RE = /:where\(([^)]+)\)/g
+      function fix(s) { return WHERE_RE.test(s) ? s.replace(WHERE_RE, '$1') : s }
+      var _qsa = Document.prototype.querySelectorAll
+      Document.prototype.querySelectorAll = function (s) { return _qsa.call(this, fix(s)) }
+      var _qs = Document.prototype.querySelector
+      Document.prototype.querySelector = function (s) { return _qs.call(this, fix(s)) }
+      var _eqsa = Element.prototype.querySelectorAll
+      Element.prototype.querySelectorAll = function (s) { return _eqsa.call(this, fix(s)) }
+      var _eqs = Element.prototype.querySelector
+      Element.prototype.querySelector = function (s) { return _eqs.call(this, fix(s)) }
+    }
   })()
 
 }
