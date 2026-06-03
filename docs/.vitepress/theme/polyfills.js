@@ -45,6 +45,13 @@ if (typeof window !== 'undefined') {
     }
   }
 
+  // Object.hasOwn (Chrome 93+)
+  if (!Object.hasOwn) {
+    Object.hasOwn = function (obj, prop) {
+      return Object.prototype.hasOwnProperty.call(obj, prop)
+    }
+  }
+
   // Object.fromEntries (Chrome 73+)
   if (!Object.fromEntries) {
     Object.fromEntries = function (iterable) {
