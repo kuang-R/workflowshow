@@ -23,6 +23,7 @@ export default withMermaid(
     nav: [
       { text: '首页', link: '/' },
       { text: '文件下载', link: '/downloads' },
+      { text: '关于', link: '/about' },
     ],
 
     search: {
