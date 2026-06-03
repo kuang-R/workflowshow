@@ -45,6 +45,20 @@ if (typeof window !== 'undefined') {
     }
   }
 
+  // Object.fromEntries (Chrome 73+)
+  if (!Object.fromEntries) {
+    Object.fromEntries = function (iterable) {
+      var obj = {}
+      // Handle arrays and array-likes
+      if (Array.isArray(iterable)) {
+        for (var i = 0; i < iterable.length; i++) {
+          obj[iterable[i][0]] = iterable[i][1]
+        }
+      }
+      return obj
+    }
+  }
+
   // ResizeObserver stub (Chrome 64+) - markmap-view uses it internally
   if (typeof ResizeObserver === 'undefined') {
     window.ResizeObserver = function (callback) {
