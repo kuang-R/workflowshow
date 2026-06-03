@@ -1,14 +1,15 @@
 <template>
   <div class="mindmap-layout">
     <header class="mindmap-header">
-      <a href="/" class="mindmap-title">{{ siteTitle }}</a>
+      <a :href="withBase('/')" class="mindmap-title">{{ siteTitle }}</a>
       <div class="mindmap-breadcrumb">
-        <a v-for="(crumb, i) in breadcrumbs" :key="i" :href="crumb.link">
-          {{ crumb.text }}
-        </a>
+        <template v-for="(crumb, i) in breadcrumbs" :key="i">
+          <a v-if="crumb.link" :href="withBase(crumb.link)">{{ crumb.text }}</a>
+          <span v-else>{{ crumb.text }}</span>
+        </template>
       </div>
       <nav class="mindmap-nav">
-        <a v-for="item in navItems" :key="item.link" :href="item.link">
+        <a v-for="item in navItems" :key="item.link" :href="withBase(item.link)">
           {{ item.text }}
         </a>
       </nav>
@@ -26,7 +27,7 @@
 
 <script setup>
 import { computed, defineAsyncComponent } from 'vue'
-import { useData } from 'vitepress'
+import { useData, withBase } from 'vitepress'
 
 const MindMap = defineAsyncComponent(function () {
   return import('../components/MindMap.vue')
@@ -73,12 +74,13 @@ const navItems = computed(() => theme.value.nav || [])
   margin-right: 24px;
 }
 
-.mindmap-breadcrumb a + a {
-  margin-left: 8px;
+.mindmap-breadcrumb a,
+.mindmap-breadcrumb span {
+  font-size: 13px;
+  color: var(--vp-c-text-2);
 }
 
 .mindmap-breadcrumb a {
-  color: var(--vp-c-text-2);
   text-decoration: none;
 }
 
@@ -86,8 +88,9 @@ const navItems = computed(() => theme.value.nav || [])
   color: var(--vp-c-brand);
 }
 
-.mindmap-breadcrumb a + a::before {
+.mindmap-breadcrumb > * + *::before {
   content: ' / ';
+  margin: 0 8px;
   color: var(--vp-c-divider);
 }
 
