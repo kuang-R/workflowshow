@@ -78,19 +78,25 @@ if (typeof window !== 'undefined') {
   }
 
   // Constructable CSSStyleSheet (Chrome 73+) — Mermaid uses it for themes
-  if (typeof CSSStyleSheet === 'undefined' || !CSSStyleSheet.prototype.insertRule) {
+  // Chrome 63 has CSSStyleSheet but it's NOT constructable; must test with try/catch
+  try { new window.CSSStyleSheet() } catch (e) {
+    var _CSSStyleSheet = window.CSSStyleSheet
     window.CSSStyleSheet = function () {
       var el = document.createElement('style')
       document.head.appendChild(el)
       return {
-        insertRule: function (rule, index) {
-          return el.sheet.insertRule(rule, index)
-        },
+        insertRule: function (rule, index) { return el.sheet.insertRule(rule, index) },
         deleteRule: function (index) { el.sheet.deleteRule(index) },
         get cssRules() { return el.sheet.cssRules },
         replace: function (text) { el.textContent = text; return Promise.resolve() },
         replaceSync: function (text) { el.textContent = text },
       }
+    }
+    // Preserve static methods/properties
+    if (_CSSStyleSheet) {
+      Object.keys(_CSSStyleSheet).forEach(function (k) {
+        window.CSSStyleSheet[k] = _CSSStyleSheet[k]
+      })
     }
   }
 
