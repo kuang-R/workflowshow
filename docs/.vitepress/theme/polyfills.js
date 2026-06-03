@@ -77,6 +77,23 @@ if (typeof window !== 'undefined') {
     }
   }
 
+  // Constructable CSSStyleSheet (Chrome 73+) — Mermaid uses it for themes
+  try { new window.CSSStyleSheet() } catch (e) {
+    window.CSSStyleSheet = function () {
+      var el = document.createElement('style')
+      document.head.appendChild(el)
+      return {
+        insertRule: function (rule, index) {
+          return el.sheet.insertRule(rule, index)
+        },
+        deleteRule: function (index) { el.sheet.deleteRule(index) },
+        get cssRules() { return el.sheet.cssRules },
+        replace: function (text) { el.textContent = text; return Promise.resolve() },
+        replaceSync: function (text) { el.textContent = text },
+      }
+    }
+  }
+
   // Patch querySelector/querySelectorAll to strip :where() (Chrome 88+)
   ;(function () {
     function fix(s) { return s.replace(/:where\(([^)]+)\)/g, '$1') }
