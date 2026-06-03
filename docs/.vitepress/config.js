@@ -1,32 +1,61 @@
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 
-// Vite plugin: replace Unicode property escapes in regex literals (Chrome 64+)
-// Mermaid + marked use /[\p{L}\p{N}]/u patterns that crash Chrome 63 at parse time
-function unicodePropPlugin() {
+// Vite plugin: fix regex syntax unsupported in Chrome 63
+function compatPlugin() {
+  // --- Unicode property escapes (Chrome 64+) ---
   var base = {
-    L: 'a-zA-Z',                     // Letter
-    N: '0-9',                        // Number
-    P: '\\x21-\\x2F\\x3A-\\x40\\x7B-\\x7E',  // Punctuation
-    S: '\\x24\\x2B\\x3C-\\x3E\\x5E\\x60\\x7C\\x7E',  // Symbol
-    Z: '\\x20',                      // Separator (space)
+    L: 'a-zA-Z',
+    N: '0-9',
+    P: '\\x21-\\x2F\\x3A-\\x40\\x7B-\\x7E',
+    S: '\\x24\\x2B\\x3C-\\x3E\\x5E\\x60\\x7C\\x7E',
+    Z: '\\x20',
   }
-  var re = /\\[pP]\{[^}]+\}/g
-  function safeReplace(m) {
-    // Extract category: \p{Lo} → L, \P{Sm} → S
+  var uniRe = /\\[pP]\{[^}]+\}/g
+  function replaceUnicode(m) {
     var negated = m[1] === 'P'
     var cat = m.slice(3, -1)
-    var b = base[cat] || base[cat[0]]  // full match or first char
-    if (!b) return '\\\\x20-\\\\x7E'    // unknown → broad ASCII printable
-    if (negated) return '^' + b
-    return b
+    var r = base[cat] || base[cat[0]] || '\\x20-\\x7E'
+    return negated ? '^' + r : r
   }
+
+  // --- Named capture groups (Chrome 64+) ---
+  // Replace (?<name>...) with ( and \k<name> with \N
+  var nameRe = /\(\?<(\w+)>/g
+  function replaceNamedGroups(code) {
+    var names = []
+    var match
+    nameRe.lastIndex = 0
+    var pat = /\(\?<(\w+)>/g
+    while ((match = pat.exec(code)) !== null) {
+      if (names.indexOf(match[1]) === -1) names.push(match[1])
+    }
+    if (names.length === 0) return code
+    // Replace named groups with regular capturing groups
+    code = code.replace(/\(\?<(\w+)>/g, '(')
+    // Replace named backreferences with numeric
+    names.forEach(function (name, i) {
+      var refRe = new RegExp('\\\\k<' + name + '>', 'g')
+      code = code.replace(refRe, '\\' + (i + 1))
+    })
+    return code
+  }
+
   return {
-    name: 'unicode-prop-polyfill',
+    name: 'chrome63-regex-compat',
     transform(code, id) {
-      if (!re.test(code)) return
-      console.log('[unicode-prop] fixing:', id)
-      return { code: code.replace(re, safeReplace) }
+      var changed = false
+      if (uniRe.test(code)) {
+        code = code.replace(uniRe, replaceUnicode)
+        changed = true
+      }
+      // Named groups: check if file contains (?<name> patterns
+      if (/\(\?<\w+>/.test(code)) {
+        code = replaceNamedGroups(code)
+        changed = true
+      }
+      if (changed) console.log('[compat] fixed regex in:', id)
+      return { code: code, map: null }
     },
   }
 }
@@ -39,7 +68,7 @@ export default withMermaid(
 
   // 最大浏览器兼容性
   vite: {
-    plugins: [unicodePropPlugin()],
+    plugins: [compatPlugin()],
     build: {
       target: 'es2015',
       cssTarget: 'chrome61',
@@ -61,13 +90,11 @@ export default withMermaid(
       provider: 'local',
     },
 
-    // 默认页面底部展示
     footer: {
       message: '作者：XXX | 联系：admin@example.com',
       copyright: 'Copyright © 2026',
     },
 
-    // 作者信息，供全局使用
     author: {
       name: 'XXX',
       contact: 'admin@example.com',
