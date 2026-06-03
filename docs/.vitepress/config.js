@@ -1,9 +1,8 @@
 import { defineConfig } from 'vitepress'
-import { withMermaid } from 'vitepress-plugin-mermaid'
+import { MermaidPlugin, MermaidMarkdown } from 'vitepress-plugin-mermaid'
 
 // Vite plugin: fix regex syntax unsupported in Chrome 63
 function compatPlugin() {
-  // --- Unicode property escapes (Chrome 64+) ---
   var base = {
     L: 'a-zA-Z',
     N: '0-9',
@@ -18,65 +17,72 @@ function compatPlugin() {
     var r = base[cat] || base[cat[0]] || '\\x20-\\x7E'
     return negated ? '^' + r : r
   }
-
-  // --- Named capture groups (Chrome 64+) ---
-  // Replace (?<name>...) with ( and \k<name> with \N
-  var nameRe = /\(\?<(\w+)>/g
   function replaceNamedGroups(code) {
-    var names = []
-    var match
-    nameRe.lastIndex = 0
-    var pat = /\(\?<(\w+)>/g
+    var names = [], pat = /\(\?<(\w+)>/g, match
     while ((match = pat.exec(code)) !== null) {
       if (names.indexOf(match[1]) === -1) names.push(match[1])
     }
     if (names.length === 0) return code
-    // Replace named groups with regular capturing groups
     code = code.replace(/\(\?<(\w+)>/g, '(')
-    // Replace named backreferences with numeric
     names.forEach(function (name, i) {
-      var refRe = new RegExp('\\\\k<' + name + '>', 'g')
-      code = code.replace(refRe, '\\' + (i + 1))
+      code = code.replace(new RegExp('\\\\k<' + name + '>', 'g'), '\\' + (i + 1))
     })
     return code
   }
-
   return {
     name: 'chrome63-regex-compat',
     transform(code, id) {
-      var changed = false
-      if (uniRe.test(code)) {
-        code = code.replace(uniRe, replaceUnicode)
-        changed = true
-      }
-      // Named groups: check if file contains (?<name> patterns
-      if (/\(\?<\w+>/.test(code)) {
-        code = replaceNamedGroups(code)
-        changed = true
-      }
-      if (changed) console.log('[compat] fixed regex in:', id)
+      if (uniRe.test(code)) code = code.replace(uniRe, replaceUnicode)
+      if (/\(\?<\w+>/.test(code)) code = replaceNamedGroups(code)
       return { code: code, map: null }
     },
   }
 }
 
-export default withMermaid(
-  defineConfig({
+// Custom Vite plugin: inject lazy Mermaid component into app
+function lazyMermaidPlugin() {
+  var RESOLVED_ID = '\0virtual:mermaid-config'
+  var config = { securityLevel: 'loose', startOnLoad: false }
+  return {
+    name: 'lazy-mermaid',
+    // Override the MermaidPlugin transform to use our lazy component
+    transform(code, id) {
+      if (!id.includes('vitepress/dist/client/app/index.js')) return
+      code = `import Mermaid from '/.vitepress/theme/Mermaid.vue';\n` + code
+      var lines = code.split('\n'), idx = lines.findIndex(function (l) { return l.includes('app.component') })
+      if (idx > -1) lines.splice(idx, 0, '  app.component("Mermaid", Mermaid);')
+      return { code: lines.join('\n'), map: null }
+    },
+    resolveId(id) { if (id === 'virtual:mermaid-config') return RESOLVED_ID },
+    load(id) { if (id === RESOLVED_ID) return 'export default ' + JSON.stringify(config) },
+  }
+}
+
+// markdown-it fence plugin for mermaid code blocks
+function mermaidFencePlugin(md) {
+  var orig = md.renderer.rules.fence.bind(md.renderer.rules)
+  md.renderer.rules.fence = function (tokens, idx, options, env, self) {
+    var token = tokens[idx]
+    if (token.info.trim() !== 'mermaid') return orig(tokens, idx, options, env, self)
+    return '<Suspense><template #default><Mermaid id="mermaid-' + idx + '" graph="' + encodeURIComponent(token.content) + '"></Mermaid></template><template #fallback>Loading...</template></Suspense>'
+  }
+}
+
+export default defineConfig({
   title: 'Workflow Show',
   description: '岗位工作内容、流程与文件展示',
   base: '/workflowshow/',
 
-  // 最大浏览器兼容性
+  markdown: { config: function (md) { mermaidFencePlugin(md) } },
+
   vite: {
-    plugins: [compatPlugin()],
+    plugins: [compatPlugin(), lazyMermaidPlugin()],
     build: {
       target: 'es2015',
       cssTarget: 'chrome61',
       chunkSizeWarningLimit: 800,
     },
-    esbuild: {
-      target: 'es2015',
-    },
+    esbuild: { target: 'es2015' },
   },
 
   themeConfig: {
@@ -85,19 +91,11 @@ export default withMermaid(
       { text: '文件下载', link: '/downloads' },
       { text: '关于', link: '/about' },
     ],
-
-    search: {
-      provider: 'local',
-    },
-
+    search: { provider: 'local' },
     footer: {
       message: '作者：XXX | 联系：admin@example.com',
       copyright: 'Copyright © 2026',
     },
-
-    author: {
-      name: 'XXX',
-      contact: 'admin@example.com',
-    },
+    author: { name: 'XXX', contact: 'admin@example.com' },
   },
-}))
+})
