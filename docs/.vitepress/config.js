@@ -2,23 +2,31 @@ import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 
 // Vite plugin: replace Unicode property escapes in regex literals (Chrome 64+)
-// Mermaid uses /[\\p{L}\\p{N}]/u patterns that crash Chrome 63 at parse time
+// Mermaid + marked use /[\p{L}\p{N}]/u patterns that crash Chrome 63 at parse time
 function unicodePropPlugin() {
-  // Replace \p{X} with equivalent ASCII range to avoid parse errors
-  var map = {
-    '\\\\p{L}': 'a-zA-Z',
-    '\\\\p{N}': '0-9',
-    '\\\\p{XID_Start}': 'a-zA-Z_',
-    '\\\\p{XID_Continue}': 'a-zA-Z0-9_',
+  var base = {
+    L: 'a-zA-Z',                     // Letter
+    N: '0-9',                        // Number
+    P: '\\x21-\\x2F\\x3A-\\x40\\x7B-\\x7E',  // Punctuation
+    S: '\\x24\\x2B\\x3C-\\x3E\\x5E\\x60\\x7C\\x7E',  // Symbol
+    Z: '\\x20',                      // Separator (space)
   }
-  var keys = Object.keys(map)
-  var re = new RegExp(keys.join('|'), 'g')
+  var re = /\\[pP]\{[^}]+\}/g
+  function safeReplace(m) {
+    // Extract category: \p{Lo} → L, \P{Sm} → S
+    var negated = m[1] === 'P'
+    var cat = m.slice(3, -1)
+    var b = base[cat] || base[cat[0]]  // full match or first char
+    if (!b) return '\\\\x20-\\\\x7E'    // unknown → broad ASCII printable
+    if (negated) return '^' + b
+    return b
+  }
   return {
     name: 'unicode-prop-polyfill',
     transform(code, id) {
       if (!re.test(code)) return
       console.log('[unicode-prop] fixing:', id)
-      return { code: code.replace(re, function (m) { return map[m] }) }
+      return { code: code.replace(re, safeReplace) }
     },
   }
 }
