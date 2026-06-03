@@ -1,4 +1,5 @@
 import './polyfills.js'
+import './styles.css'
 import DefaultTheme from 'vitepress/theme'
 import Layout from './Layout.vue'
 

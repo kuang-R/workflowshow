@@ -1,0 +1,29 @@
+/* 默认页面底部栏 — 与思维导图 footer 统一 */
+.VPFooter {
+  padding: 4px 24px !important;
+  border-top: 1px solid var(--vp-c-divider) !important;
+  background: var(--vp-c-bg-soft) !important;
+}
+
+.VPFooter .container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--vp-c-text-3);
+}
+
+.VPFooter .message,
+.VPFooter .copyright {
+  font-size: 11px;
+  color: var(--vp-c-text-3);
+  line-height: 1;
+}
+
+.VPFooter .message + .copyright::before {
+  content: '|';
+  margin-right: 8px;
+  color: var(--vp-c-divider);
+}
