@@ -92,7 +92,7 @@ function render() {
     container.value.style.cursor = found ? 'pointer' : ''
   })
 
-  // Navigate on click
+  // Navigate on click — 外部链接新窗口，内部链接当前页跳转
   container.value.addEventListener('click', function (e) {
     var els = document.elementsFromPoint ? document.elementsFromPoint(e.clientX, e.clientY) : []
     var anchor = null
@@ -103,9 +103,7 @@ function render() {
     var href = anchor.getAttribute('data-href')
     if (!href) return
     e.stopPropagation()
-    if (href.startsWith('/') || href.startsWith(location.origin)) {
-      location.href = href
-    } else {
+    if (/^https?:\/\//.test(href) && href.indexOf(location.hostname) === -1) {
       var tmp = document.createElement('a')
       tmp.href = href
       tmp.target = '_blank'
@@ -113,6 +111,8 @@ function render() {
       document.body.appendChild(tmp)
       tmp.click()
       document.body.removeChild(tmp)
+    } else {
+      location.href = href
     }
   })
 }
