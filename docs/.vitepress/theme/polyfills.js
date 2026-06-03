@@ -68,4 +68,5 @@ if (typeof window !== 'undefined') {
     var _eqs = Element.prototype.querySelector
     Element.prototype.querySelector = function (s) { return _eqs.call(this, fix(s)) }
   })()
+
 }
