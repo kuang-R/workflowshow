@@ -1,6 +1,8 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
-export default defineConfig({
+export default withMermaid(
+  defineConfig({
   title: 'Workflow Show',
   description: '岗位工作内容、流程与文件展示',
   base: '/workflowshow/',
@@ -39,4 +41,4 @@ export default defineConfig({
       contact: 'admin@example.com',
     },
   },
-})
+}))
