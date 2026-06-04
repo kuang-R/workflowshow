@@ -1,16 +1,16 @@
 # Workflow Show
 
-基于 VitePress + markmap 的岗位工作展示平台，以可交互思维导图形式展示工作组成与流程，支持 Docker 容器化部署。
+基于 VitePress + markmap 的岗位工作展示平台，以可交互思维导图形式呈现工作组成与流程，支持 Docker 容器化部署。
 
 **演示站点：** [kuang-R.github.io/workflowshow](https://kuang-R.github.io/workflowshow/)
 
 ## 技术栈
 
 - **VitePress** — 静态站点生成
-- **markmap** — Markdown 列表渲染为可缩放、可点击跳转的思维导图
+- **markmap** — 将 Markdown 列表渲染为可缩放、可点击跳转的思维导图
 - **Mermaid** — 流程图、时序图等图表渲染
 - **Nginx** — 生产环境静态文件服务
-- **Docker** — 容器化部署，支持运行时从服务器文件重建站点
+- **Docker** — 容器化部署，支持运行时从挂载内容重建站点
 
 ## 快速开始
 
@@ -24,22 +24,76 @@ npm run docs:build
 npm run docs:preview
 ```
 
-> 因兼容性处理需要构建阶段介入，不支持 `docs:dev` 热更新开发模式。
+> 因兼容性处理依赖构建阶段，不支持 `docs:dev` 热更新开发模式。
 
 ## Docker 部署
+
+### docker-compose.yml
+
+```yaml
+services:
+  workflowshow:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      # 单目录挂载 — 修改 content/ 下的文件后重启容器即可生效
+      - ./content:/app/content
+```
+
+### 常用命令
 
 ```bash
 # 首次部署 — 构建镜像并启动
 docker compose up -d --build
 
-# 只改了内容（content/*.md）— 重启容器，自动重新构建站点
+# 仅修改内容（content/*.md）— 重启容器，自动重新构建站点
 docker compose restart
 
-# 改了代码（docs/.vitepress/ 等）— 需要重新构建镜像
+# 修改代码（docs/.vitepress/ 等）— 需要重新构建镜像
 docker compose up -d --build
+
+# 停止服务
+docker compose down
+
+# 查看日志
+docker compose logs -f
 ```
 
-镜像内包含 Node.js + Nginx，启动流程：`entrypoint.sh` 将 `content/` 拷贝到 `docs/` → `npm run docs:build` → `cp dist → nginx html` → 启动 Nginx。
+### 自定义端口
+
+如需改用其他端口（如 8080），修改 `docker-compose.yml` 中的 `ports` 映射：
+
+```yaml
+services:
+  workflowshow:
+    build: .
+    ports:
+      - "8080:80"
+    volumes:
+      - ./content:/app/content
+```
+
+### 生产环境示例
+
+绑定指定 IP、设置重启策略、限制资源：
+
+```yaml
+services:
+  workflowshow:
+    build: .
+    ports:
+      - "127.0.0.1:80:80"
+    volumes:
+      - ./content:/app/content
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+```
+
+镜像内置 Node.js + Nginx，启动流程：`entrypoint.sh` 将 `content/` 拷贝到 `docs/` → `npm run docs:build` → 将 `dist` 复制到 Nginx 静态目录 → 启动 Nginx。
 
 ## 目录结构
 
@@ -68,7 +122,7 @@ content/                                # 服务器内容（Docker 挂载点）
 
 ## 思维导图编写
 
-每个 `.md` 文件使用 `layout: mindmap`，内容写在 `mindmap` frontmatter 字段中：
+每个 `.md` 文件使用 `layout: mindmap`，思维导图内容写在 `mindmap` frontmatter 字段中：
 
 ```markdown
 ---
@@ -104,7 +158,7 @@ mindmap: |
 
 ## 配置
 
-作者和联系信息在 `docs/.vitepress/config.js` 中修改：
+作者与联系信息在 `docs/.vitepress/config.js` 中修改：
 
 ```js
 themeConfig: {
