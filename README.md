@@ -37,8 +37,8 @@ services:
     ports:
       - "80:80"
     volumes:
-      # 单目录挂载 — 修改 content/ 下的文件后重启容器即可生效
-      # 可选：不挂载时镜像自动使用内置默认内容
+      # 首次启动时自动将默认文件写入此目录，之后修改文件重启即可生效
+      # 可选：不挂载时镜像使用内置默认内容
       - ./content:/app/content
 ```
 
@@ -94,7 +94,7 @@ services:
           memory: 512M
 ```
 
-镜像内置 Node.js + Nginx 以及默认站点内容。首次部署时无需准备 `content/` 目录，创建空目录挂载即可自动使用内置默认内容。启动流程：`entrypoint.sh` 检测挂载的 `content/` 是否有内容 → 有则使用挂载内容，无则使用内置默认 → `npx vitepress build docs --base /`（覆盖 GitHub Pages 路径为根路径）→ 将 `dist` 复制到 Nginx 静态目录 → 启动 Nginx。
+镜像内置 Node.js + Nginx 以及默认站点内容。首次部署时只需创建空目录挂载，容器会自动将默认文件（页面、配置、思维导图）写入该目录，之后直接修改这些文件并重启容器即可更新站点。启动流程：`entrypoint.sh` 检测挂载目录是否为空 → 空则从镜像填充默认文件 → 复制对应内容到 `docs/` → `npx vitepress build docs --base /`（覆盖 GitHub Pages 路径为根路径）→ 将 `dist` 复制到 Nginx 静态目录 → 启动 Nginx。
 
 ## 目录结构
 

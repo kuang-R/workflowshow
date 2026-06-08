@@ -3,25 +3,24 @@ set -e
 
 echo "==> Syncing server content into docs..."
 
-# Check if mounted content has actual files
-if [ -n "$(find /app/content -name '*.md' -print -quit 2>/dev/null)" ] \
-  || [ -n "$(find /app/content/mindmaps -name '*.md' -print -quit 2>/dev/null)" ]; then
-  echo "==> Mounted content found, using custom content"
-  USE_DEFAULT=false
-else
-  echo "==> Mounted content empty, using default content"
-  USE_DEFAULT=true
+# Seed default content into empty mounted directory so user can modify on host
+if [ -d /app/content ] \
+  && [ -z "$(find /app/content -mindepth 1 -not -name '.*' -print -quit 2>/dev/null)" ]; then
+  echo "==> Seeding default content into mounted directory..."
+  cp -r /app/default-content/* /app/content/
 fi
 
-src() {
-  if $USE_DEFAULT; then
-    echo "/app/default-content${1:+/$1}"
-  else
-    echo "/app/content${1:+/$1}"
-  fi
-}
+# Determine content source
+if [ -d /app/content ] && [ -n "$(find /app/content -name '*.md' -print -quit 2>/dev/null)" ]; then
+  SRC=/app/content
+  echo "==> Using mounted content"
+else
+  SRC=/app/default-content
+  echo "==> Using default content"
+fi
 
-SRC=$(src)
+MINDMAPS_SRC="$SRC/mindmaps"
+FILES_SRC="$SRC/files"
 
 # Copy all content files preserving directory structure
 # Excludes: mindmaps/ (mindmap pages), files/ (downloads), site.json (config),
@@ -39,17 +38,16 @@ done
 echo "==> Synced pages from $SRC"
 
 # Mindmap pages
-cp -r "$(src mindmaps)"/* /app/docs/mindmaps/
-echo "==> Synced mindmaps from $(src mindmaps)"
+cp -r "$MINDMAPS_SRC"/* /app/docs/mindmaps/
+echo "==> Synced mindmaps from $MINDMAPS_SRC"
 
 # Downloadable files
-FILES_SRC=$(src files)
 if [ -n "$(find "$FILES_SRC" -type f -print -quit 2>/dev/null)" ]; then
   cp -r "$FILES_SRC"/* /app/docs/public/
   echo "==> Synced files from $FILES_SRC"
 fi
 
-# Site config overrides (prefer mounted, fallback to default)
+# Site config (prefer mounted, fallback to default)
 if [ -f /app/content/site.json ]; then
   cp /app/content/site.json /app/docs/.vitepress/site.json
   echo "==> Using mounted site config"
