@@ -1,5 +1,27 @@
 import { defineConfig } from 'vitepress'
 import { MermaidPlugin, MermaidMarkdown } from 'vitepress-plugin-mermaid'
+import { readFileSync } from 'fs'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
+
+var __dirname = dirname(fileURLToPath(import.meta.url))
+
+// Load site config overrides (from content/site.json)
+var siteJson = {}
+try {
+  siteJson = JSON.parse(readFileSync(resolve(__dirname, 'site.json'), 'utf-8'))
+} catch (e) { /* use defaults */ }
+
+var defaultNav = [
+  { text: '首页', link: '/' },
+  { text: '文件下载', link: '/downloads' },
+  { text: '关于', link: '/about' },
+]
+var defaultFooter = {
+  message: '作者：XXX | 联系：admin@example.com',
+  copyright: 'Copyright © 2026',
+}
+var defaultAuthor = { name: 'XXX', contact: 'admin@example.com' }
 
 // Vite plugin: fix regex syntax unsupported in Chrome 63
 function compatPlugin() {
@@ -86,16 +108,9 @@ export default defineConfig({
   },
 
   themeConfig: {
-    nav: [
-      { text: '首页', link: '/' },
-      { text: '文件下载', link: '/downloads' },
-      { text: '关于', link: '/about' },
-    ],
+    nav: siteJson.nav || defaultNav,
     search: { provider: 'local' },
-    footer: {
-      message: '作者：XXX | 联系：admin@example.com',
-      copyright: 'Copyright © 2026',
-    },
-    author: { name: 'XXX', contact: 'admin@example.com' },
+    footer: siteJson.footer || defaultFooter,
+    author: siteJson.author || defaultAuthor,
   },
 })

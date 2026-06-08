@@ -48,7 +48,7 @@ services:
 # 首次部署 — 构建镜像并启动
 docker compose up -d --build
 
-# 仅修改内容（content/*.md）— 重启容器，自动重新构建站点
+# 仅修改内容（*.md、site.json 等）— 重启容器，自动重新构建站点
 docker compose restart
 
 # 修改代码（docs/.vitepress/ 等）— 需要重新构建镜像
@@ -117,8 +117,14 @@ docs/                                   # 应用代码 + 默认内容
 └── public/files/                       # 可下载文件
 
 content/                                # 服务器内容（Docker 挂载点，可选）
-├── mindmaps/                           # → 启动时覆盖 docs/mindmaps
-└── files/                              # → 启动时覆盖 docs/public
+├── site.json                           # 站点配置（导航、作者等）
+├── index.md                            # 首页
+├── downloads.md                        # 文件下载
+├── about.md                            # 关于页面
+├── processes/                          # 子目录，页面会保留路径结构
+│   └── cicd.md                         # → /processes/cicd
+├── mindmaps/                           # 思维导图内容
+└── files/                              # 可下载文件
                                         # 不挂载时镜像自动使用内置默认内容
 ```
 
@@ -160,19 +166,33 @@ mindmap: |
 
 ## 配置
 
-作者与联系信息在 `docs/.vitepress/config.js` 中修改：
+通过 `content/site.json` 自定义站点导航、作者与页脚信息，修改后重启容器即生效：
 
-```js
-themeConfig: {
-  footer: {
-    message: '作者：XXX | 联系：admin@example.com',
+```json
+{
+  "nav": [
+    { "text": "首页", "link": "/" },
+    { "text": "文件下载", "link": "/downloads" },
+    { "text": "关于", "link": "/about" }
+  ],
+  "footer": {
+    "message": "作者：XXX | 联系：admin@example.com",
+    "copyright": "Copyright © 2026"
   },
-  author: {
-    name: 'XXX',
-    contact: 'admin@example.com',
-  },
+  "author": {
+    "name": "XXX",
+    "contact": "admin@example.com"
+  }
 }
 ```
+
+### 添加/删除页面
+
+1. 创建或删除 `content/` 下的 `.md` 文件
+2. 在 `site.json` 的 `nav` 数组中添加或移除对应链接
+3. `docker compose restart` 重启容器（构建约 8 秒）
+
+页面文件支持放在子目录中分类整理，目录结构即 URL 路径。例如 `content/processes/cicd.md` → `/processes/cicd`。
 
 ## 兼容性
 

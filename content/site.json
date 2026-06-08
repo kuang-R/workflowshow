@@ -1,0 +1,15 @@
+{
+  "nav": [
+    { "text": "首页", "link": "/" },
+    { "text": "文件下载", "link": "/downloads" },
+    { "text": "关于", "link": "/about" }
+  ],
+  "footer": {
+    "message": "作者：XXX | 联系：admin@example.com",
+    "copyright": "Copyright © 2026"
+  },
+  "author": {
+    "name": "XXX",
+    "contact": "admin@example.com"
+  }
+}
