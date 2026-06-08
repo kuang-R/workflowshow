@@ -7,7 +7,7 @@ cp -r /app/content/files/* /app/docs/public/ 2>/dev/null || true
 
 echo "==> Building site from /app/docs..."
 cd /app
-npm run docs:build
+npx vitepress build docs --base /
 
 echo "==> Copying built files to Nginx..."
 mkdir -p /usr/share/nginx/html

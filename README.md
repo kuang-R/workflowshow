@@ -93,7 +93,7 @@ services:
           memory: 512M
 ```
 
-镜像内置 Node.js + Nginx，启动流程：`entrypoint.sh` 将 `content/` 拷贝到 `docs/` → `npm run docs:build` → 将 `dist` 复制到 Nginx 静态目录 → 启动 Nginx。
+镜像内置 Node.js + Nginx，启动流程：`entrypoint.sh` 将 `content/` 拷贝到 `docs/` → `npx vitepress build docs --base /`（覆盖 GitHub Pages 路径为根路径）→ 将 `dist` 复制到 Nginx 静态目录 → 启动 Nginx。
 
 ## 目录结构
 
