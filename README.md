@@ -38,6 +38,7 @@ services:
       - "80:80"
     volumes:
       # 单目录挂载 — 修改 content/ 下的文件后重启容器即可生效
+      # 可选：不挂载时镜像自动使用内置默认内容
       - ./content:/app/content
 ```
 
@@ -93,7 +94,7 @@ services:
           memory: 512M
 ```
 
-镜像内置 Node.js + Nginx，启动流程：`entrypoint.sh` 将 `content/` 拷贝到 `docs/` → `npx vitepress build docs --base /`（覆盖 GitHub Pages 路径为根路径）→ 将 `dist` 复制到 Nginx 静态目录 → 启动 Nginx。
+镜像内置 Node.js + Nginx 以及默认站点内容。首次部署时无需准备 `content/` 目录，创建空目录挂载即可自动使用内置默认内容。启动流程：`entrypoint.sh` 检测挂载的 `content/` 是否有内容 → 有则使用挂载内容，无则使用内置默认 → `npx vitepress build docs --base /`（覆盖 GitHub Pages 路径为根路径）→ 将 `dist` 复制到 Nginx 静态目录 → 启动 Nginx。
 
 ## 目录结构
 
@@ -115,9 +116,10 @@ docs/                                   # 应用代码 + 默认内容
 ├── mindmaps/                           # 思维导图内容
 └── public/files/                       # 可下载文件
 
-content/                                # 服务器内容（Docker 挂载点）
+content/                                # 服务器内容（Docker 挂载点，可选）
 ├── mindmaps/                           # → 启动时覆盖 docs/mindmaps
 └── files/                              # → 启动时覆盖 docs/public
+                                        # 不挂载时镜像自动使用内置默认内容
 ```
 
 ## 思维导图编写

@@ -2,8 +2,29 @@
 set -e
 
 echo "==> Syncing server content into docs..."
-cp -r /app/content/mindmaps/* /app/docs/mindmaps/ 2>/dev/null || true
-cp -r /app/content/files/* /app/docs/public/ 2>/dev/null || true
+
+# Determine content source: mounted volume takes priority, fallback to defaults
+CONTENT_MINDMAPS="/app/content/mindmaps"
+CONTENT_FILES="/app/content/files"
+
+if ls "$CONTENT_MINDMAPS"/* >/dev/null 2>&1; then
+  echo "==> Using mounted mindmaps content"
+else
+  echo "==> Mounted content empty, using default mindmaps"
+  CONTENT_MINDMAPS="/app/default-content/mindmaps"
+fi
+
+if ls "$CONTENT_FILES"/* >/dev/null 2>&1; then
+  echo "==> Using mounted files content"
+else
+  echo "==> Mounted content empty, using default files"
+  CONTENT_FILES="/app/default-content/files"
+fi
+
+cp -r "$CONTENT_MINDMAPS"/* /app/docs/mindmaps/
+if ls "$CONTENT_FILES"/* >/dev/null 2>&1; then
+  cp -r "$CONTENT_FILES"/* /app/docs/public/
+fi
 
 echo "==> Building site from /app/docs..."
 cd /app

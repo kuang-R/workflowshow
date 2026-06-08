@@ -10,7 +10,8 @@ RUN npm ci
 
 # 复制应用代码和默认内容
 COPY docs/ ./docs/
-COPY content/ ./content/
+# 默认内容 — 运行时若未挂载 content 则使用此默认值
+COPY content/ ./default-content/
 
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
