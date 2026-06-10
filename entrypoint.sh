@@ -43,7 +43,8 @@ echo "==> Synced mindmaps from $MINDMAPS_SRC"
 
 # Downloadable files
 if [ -n "$(find "$FILES_SRC" -type f -print -quit 2>/dev/null)" ]; then
-  cp -r "$FILES_SRC"/* /app/docs/public/
+  mkdir -p /app/docs/public/files
+  cp -r "$FILES_SRC"/* /app/docs/public/files/
   echo "==> Synced files from $FILES_SRC"
 fi
 
