@@ -99,6 +99,7 @@ export default defineConfig({
 
   vite: {
     plugins: [compatPlugin(), lazyMermaidPlugin()],
+    assetsInclude: ['**/*.doc', '**/*.docx', '**/*.xls', '**/*.xlsx', '**/*.ppt', '**/*.pptx', '**/*.pdf'],
     build: {
       target: 'es2015',
       cssTarget: 'chrome61',
